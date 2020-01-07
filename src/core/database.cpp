@@ -54,19 +54,52 @@ bool Database::createTable()
 {
     QSqlQuery query;
     if(!query.exec( "CREATE TABLE products ("
-                           "id SERIAL PRIMARY KEY, "
+                           "p_id SERIAL PRIMARY KEY, "
                            "product VARCHAR(255)   NOT NULL,"
                            "price REAL             NOT NULL,"
                            "volume INT             NOT NULL,"
-                           "for_recipe INT                NOT NULL"
+                           "for_recipe INT         NOT NULL"
                        " )"
                    )){
         qDebug() << "DataBase: error of create products";
         qDebug() << query.lastError().text();
         return false;
-    } else {
-        qDebug() << "Created";
-        return true;
     }
-    return false;
+    query.clear();
+    if(!query.exec( "CREATE TABLE warehouse ("
+                           "p_id INT REFERENCES products(p_id),"
+                           "count INT NOT NULL,"
+                           "CONSTRAINT pk PRIMARY KEY(p_id)"
+                       " )"
+                   )){
+        qDebug() << "DataBase: error of create warehouse";
+        qDebug() << query.lastError().text();
+        return false;
+    }
+    query.clear();
+    if(!query.exec( "CREATE TABLE types_recipes ("
+                           "t_id  SERIAL PRIMARY KEY,"
+                           "type  VARCHAR(50) NOT NULL"
+                       " )"
+                   )){
+        qDebug() << "DataBase: error of create types";
+        qDebug() << query.lastError().text();
+        return false;
+    }
+    query.clear();
+    if(!query.exec( "CREATE TABLE recipes ("
+                           "r_id    SERIAL PRIMARY KEY,"
+                           "recipe  VARCHAR(255) NOT NULL,"
+                           "t_id    INT REFERENCES types_recipes(t_id),"
+                           "p_id    INT REFERENCES products(p_id),"
+                           "count   INT NOT NULL"
+                       " )"
+                   )){
+        qDebug() << "DataBase: error of create recipes";
+        qDebug() << query.lastError().text();
+        return false;
+    }
+    qDebug() << "Created";
+    return true;
+
 }
